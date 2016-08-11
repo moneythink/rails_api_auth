@@ -9,6 +9,8 @@ class GoogleAuthenticator < BaseAuthenticator
   TOKEN_URL = 'https://www.googleapis.com/oauth2/v3/token'.freeze
   PROFILE_URL = 'https://www.googleapis.com/plus/v1/people/me/openIdConnect?access_token=%{access_token}'.freeze
 
+  attr_reader :google_user
+
   private
 
     def connect_login_to_account(login, user)

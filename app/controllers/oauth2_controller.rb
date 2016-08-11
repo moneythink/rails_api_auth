@@ -58,9 +58,11 @@ class Oauth2Controller < ApplicationController
     def authenticate_with_google(auth_code)
       oauth2_error('no_authorization_code') && return unless auth_code.present?
 
-      login = GoogleAuthenticator.new(auth_code).authenticate!
 
-      render json: { access_token: login.oauth2_token }
+      authenticator = GoogleAuthenticator.new(auth_code)
+      login = authenticator.authenticate!
+
+      render json: { access_token: login.oauth2_token }.merge(authenticator.google_user)
     rescue GoogleAuthenticator::ApiError
       render nothing: true, status: 502
     end

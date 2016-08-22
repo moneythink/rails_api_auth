@@ -41,7 +41,8 @@ class Oauth2Controller < ApplicationController
 
   private
 
-    def authenticate_with_credentials(identification, password, provider, client = DEFAULT_CLIENT)
+    def authenticate_with_credentials(identification, password, provider, client)
+      client ||= DEFAULT_CLIENT
       login = Login.where(provider: provider, identification: identification, client: client).first
       
       # for existing users:

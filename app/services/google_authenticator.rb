@@ -13,18 +13,8 @@ class GoogleAuthenticator < BaseAuthenticator
 
   private
 
-    def connect_login_to_account(login, user)
-      login.update_attributes!(uid: user[:sub], provider: PROVIDER)
-    end
-
-    def create_login_from_account(user)
-      login_attributes = {
-        identification: user[:email],
-        uid: user[:sub],
-        provider: PROVIDER
-      }
-
-      Login.create!(login_attributes)
+    def get_uid(user)
+      user[:sub]
     end
 
     def access_token

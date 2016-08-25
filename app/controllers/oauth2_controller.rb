@@ -15,15 +15,18 @@ class Oauth2Controller < ApplicationController
 
   # rubocop:disable MethodLength
   def create
+    client = params[:accessing_application]
+    client ||= DEFAULT_CLIENT_NAME
+
     case params[:grant_type]
     when 'password'
-      authenticate_with_credentials(params[:username], params[:password], PASSWORD_PROVIDER_NAME, params[:accessing_application])
+      authenticate_with_credentials(params[:username], params[:password], PASSWORD_PROVIDER_NAME, client)
     when 'facebook_auth_code'
-      authenticate_with_facebook(params[:auth_code], FACEBOOK_PROVIDER_NAME, params[:accessing_application])
+      authenticate_with_facebook(params[:auth_code], client)
     when 'google_auth_code'
-      authenticate_with_google(params[:auth_code], GOOGLE_PROVIDER_NAME, params[:accessing_application])
+      authenticate_with_google(params[:auth_code], client)
     when 'edx_auth_code'
-      authenticate_with_edx(params[:username], params[:auth_code], EDX_PROVIDER_NAME, params[:accessing_application])
+      authenticate_with_edx(params[:username], params[:auth_code], client)
     else
       oauth2_error('unsupported_grant_type')
     end
@@ -42,11 +45,10 @@ class Oauth2Controller < ApplicationController
   private
 
     def authenticate_with_credentials(identification, password, provider, client)
-      client ||= DEFAULT_CLIENT_NAME
       login = Login.where(provider: provider, identification: identification, client: client).first
 
       # for existing users:
-      login ||= Login.where(provider: provider, identification: identification, client: nil).first || LoginNotFound.new
+      login ||= Login.where(provider: nil, identification: identification, client: nil).first || LoginNotFound.new
 
       if login.authenticate(password)
         render json: { access_token: login.oauth2_token }
@@ -55,33 +57,31 @@ class Oauth2Controller < ApplicationController
       end
     end
 
-    def authenticate_with_facebook(auth_code)
+    def authenticate_with_facebook(auth_code, client)
       oauth2_error('no_authorization_code') && return unless auth_code.present?
 
-      login = FacebookAuthenticator.new(auth_code).authenticate!
+      login = FacebookAuthenticator.new(auth_code, client).authenticate!
 
       render json: { access_token: login.oauth2_token }
     rescue FacebookAuthenticator::ApiError
       render nothing: true, status: 502
     end
 
-    def authenticate_with_google(auth_code)
+    def authenticate_with_google(auth_code, client)
       oauth2_error('no_authorization_code') && return unless auth_code.present?
 
-
-      authenticator = GoogleAuthenticator.new(auth_code)
-      login = authenticator.authenticate!
+      login = GoogleAuthenticator.new(auth_code, client).authenticate!
 
       render json: { access_token: login.oauth2_token }.merge(authenticator.google_user)
     rescue GoogleAuthenticator::ApiError
       render nothing: true, status: 502
     end
 
-    def authenticate_with_edx(username, auth_code)
+    def authenticate_with_edx(username, auth_code, client)
       oauth2_error('no_authorization_code') && return unless auth_code.present?
       oauth2_error('no_username') && return unless username.present?
 
-      login = EdxAuthenticator.new(username, auth_code).authenticate!
+      login = EdxAuthenticator.new(username, auth_code, client).authenticate!
 
       render json: { access_token: login.oauth2_token }
     rescue EdxAuthenticator::ApiError

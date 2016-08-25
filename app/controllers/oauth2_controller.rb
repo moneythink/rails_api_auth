@@ -45,10 +45,10 @@ class Oauth2Controller < ApplicationController
   private
 
     def authenticate_with_credentials(identification, password, provider, client)
-      login = Login.where(provider: provider, identification: identification, client: client).first
+      logins = Login.where(identification: identification)
 
-      # for existing users:
-      login ||= Login.where(provider: nil, identification: identification, client: nil).first || LoginNotFound.new
+      login = logins.find_by(provider: provider, client: client)
+      login ||= logins.find_by(provider: nil, client: nil) || LoginNotFound.new  # for existing users
 
       if login.authenticate(password)
         render json: { access_token: login.oauth2_token }

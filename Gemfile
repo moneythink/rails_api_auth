@@ -24,6 +24,7 @@ group :development do
 end
 
 group :test do
+  gem 'rails-controller-testing'
   gem 'shoulda'
   gem 'webmock', require: 'webmock/rspec'
   gem 'timecop'

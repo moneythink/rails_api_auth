@@ -45,6 +45,8 @@ class Oauth2Controller < ApplicationController
   private
 
     def authenticate_with_credentials(identification, password, provider, client)
+      client ||= DEFAULT_CLIENT_NAME  # in case of subclass invocation
+
       logins = Login.where(identification: identification)
 
       login = logins.find_by(provider: provider, client: client)

@@ -15,8 +15,7 @@ class Oauth2Controller < ApplicationController
 
   # rubocop:disable MethodLength
   def create
-    client = params[:accessing_application]
-    client ||= DEFAULT_CLIENT_NAME
+    client = params[:accessing_application] || DEFAULT_CLIENT_NAME
 
     case params[:grant_type]
     when 'password'

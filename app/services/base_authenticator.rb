@@ -26,9 +26,9 @@ class BaseAuthenticator
   private
 
     def find_login(provider, client, identification)
-      login_record = Login.where(provider: provider, client: client, identification: identification).first
+      login_record = Login.find_by(provider: provider, client: client, identification: identification)
       return login_record unless login_record.nil?
-      Login.where(provider: nil, client: nil, identification: identification).first
+      Login.find_by(provider: nil, client: nil, identification: identification)
     end
 
     def connect_login_to_account(login, uid, provider, client)

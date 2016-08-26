@@ -31,16 +31,16 @@ shared_examples 'a authenticator' do
     context "when an old login for the #{described_class::PROVIDER} account exists already" do
       before do
         # an "old" login doesn't have a provider or client
-        expect(Login).to receive(:where).with(
+        expect(Login).to receive(:find_by).with(
             provider: described_class::PROVIDER,
             client: client,
             identification: authenticated_user_data[:email]
-          ).and_return([])
-          expect(Login).to receive(:where).with(
+          ).and_return(nil)
+          expect(Login).to receive(:find_by).with(
               provider: nil,
               client: nil,
               identification: authenticated_user_data[:email]
-            ).and_return([login])
+            ).and_return(login)
         allow(login).to receive(:update_attributes!).with(uid: authenticated_user_data[uid_mapped_field.to_sym], provider: described_class::PROVIDER, client: client)
       end
 
@@ -53,11 +53,11 @@ shared_examples 'a authenticator' do
 
     context "when a new login for the #{described_class::PROVIDER} account exists already" do
       before do
-        expect(Login).to receive(:where).with(
+        expect(Login).to receive(:find_by).with(
             provider: described_class::PROVIDER,
             client: client,
             identification: authenticated_user_data[:email]
-          ).and_return([login])
+          ).and_return(login)
         allow(login).to receive(:update_attributes!).with(uid: authenticated_user_data[uid_mapped_field.to_sym], provider: described_class::PROVIDER, client: client)
       end
 

@@ -2,18 +2,22 @@ class BaseAuthenticator
 
   class ApiError < StandardError; end
 
-  def initialize(auth_code)
+  def initialize(auth_code, client)
     @auth_code = auth_code
+    @client    = client
   end
 
   def authenticate!
     user = get_user(access_token)
-    login = find_login(user)
+    provider = self.class::PROVIDER
+    identification = user[:email]
+    login = find_login(provider, @client, identification)
+    uid = get_uid(user)
 
     if login.present?
-      connect_login_to_account(login, user)
+      connect_login_to_account(login, uid, provider, @client)
     else
-      login = create_login_from_account(user)
+      login = create_login_from_account(@client, identification, uid)
     end
 
     login
@@ -21,8 +25,25 @@ class BaseAuthenticator
 
   private
 
-    def find_login(user)
-      Login.where(identification: user[:email]).first
+    def find_login(provider, client, identification)
+      login_record = Login.find_by(provider: provider, client: client, identification: identification)
+      return login_record unless login_record.nil?
+      Login.find_by(provider: nil, client: nil, identification: identification)
+    end
+
+    def connect_login_to_account(login, uid, provider, client)
+      # provider & client are populated for records that existed pre-concurrent logins
+      login.update_attributes!(uid: uid, provider: provider, client: client)
+    end
+
+    def create_login_from_account(client, identification, uid)
+      login_attributes = {
+        provider: self.class::PROVIDER,
+        client: client,
+        identification: identification,
+        uid: uid
+      }
+      Login.create!(login_attributes)
     end
 
     def get_request(url)

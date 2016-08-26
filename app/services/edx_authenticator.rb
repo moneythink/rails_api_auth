@@ -10,24 +10,16 @@ class EdxAuthenticator < BaseAuthenticator
   TOKEN_URL   = (DOMAIN + '/oauth2/access_token').freeze
   PROFILE_URL = (DOMAIN + '/api/user/v1/accounts/%{username}').freeze
 
-  def initialize(username, auth_code)
+  def initialize(username, auth_code, client)
     @auth_code = auth_code
     @username  = username
+    @client    = client
   end
 
   private
 
-    def connect_login_to_account(login, user)
-      login.update_attributes!(uid: user[:username], provider: PROVIDER)
-    end
-
-    def create_login_from_account(user)
-      login_attributes = {
-        identification: user[:email],
-        uid: user[:username],
-        provider: PROVIDER
-      }
-      Login.create!(login_attributes)
+    def get_uid(user)
+      user[:username]
     end
 
     def access_token

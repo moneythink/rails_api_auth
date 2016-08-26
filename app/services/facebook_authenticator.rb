@@ -11,18 +11,8 @@ class FacebookAuthenticator < BaseAuthenticator
 
   private
 
-    def connect_login_to_account(login, user)
-      login.update_attributes!(uid: user[:id], provider: PROVIDER)
-    end
-
-    def create_login_from_account(user)
-      login_attributes = {
-        identification: user[:email],
-        uid: user[:id],
-        provider: PROVIDER
-      }
-
-      Login.create!(login_attributes)
+    def get_uid(user)
+      user[:id]
     end
 
     def access_token

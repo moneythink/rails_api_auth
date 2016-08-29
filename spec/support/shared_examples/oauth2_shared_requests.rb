@@ -17,7 +17,16 @@ shared_context 'oauth2 shared contexts' do
 
     it "responds with the login's OAuth 2.0 token" do
       subject
-      expect(response.body).to be_json_eql({ access_token: login.oauth2_token }.to_json)
+
+      if grant_type.eql? 'google_auth_code'
+        expect(response.body).to be_json_eql({
+          access_token: login.oauth2_token,
+          email: email,
+          sub: authenticated_user_data[uid_mapped_field.to_sym]
+        }.to_json)
+      else
+        expect(response.body).to be_json_eql({ access_token: login.oauth2_token }.to_json)
+      end
     end
   end
 
@@ -38,7 +47,15 @@ shared_context 'oauth2 shared contexts' do
       subject
       login = Login.where(identification: email).first
 
-      expect(response.body).to be_json_eql({ access_token: login.oauth2_token }.to_json)
+      if grant_type.eql? 'google_auth_code'
+        expect(response.body).to be_json_eql({
+          access_token: login.oauth2_token,
+          email: email,
+          sub: authenticated_user_data[uid_mapped_field.to_sym]
+        }.to_json)
+      else
+        expect(response.body).to be_json_eql({ access_token: login.oauth2_token }.to_json)
+      end
     end
   end
 

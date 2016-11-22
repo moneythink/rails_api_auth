@@ -6,6 +6,8 @@ class RemoveUniqueIndexFromIdentification < ActiveRecord::Migration
 
     # add new index without uniqueness
     add_index :logins, :identification
+  rescue
+    true
   end
 
 end

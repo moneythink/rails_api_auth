@@ -1,6 +1,8 @@
-class CreateLogins < ActiveRecord::Migration
+class CreateLogins < ActiveRecord::Migrations
 
-  def change
+  def up
+    return if table_exists?(:login)
+
     create_table :logins, primary_key_options(:id) do |t|
       t.string :identification,  null: false
       t.string :password_digest, null: true
@@ -12,6 +14,10 @@ class CreateLogins < ActiveRecord::Migration
 
       t.timestamps
     end
+  end
+
+  def down
+    drop_table :logins
   end
 
   private

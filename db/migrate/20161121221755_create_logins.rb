@@ -1,4 +1,4 @@
-class CreateLogins < ActiveRecord::Migrations
+class CreateLogins < ActiveRecord::Migration
 
   def up
     return if table_exists?(:login)

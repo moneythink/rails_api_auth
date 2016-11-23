@@ -1,7 +1,7 @@
 class CreateLogins < ActiveRecord::Migration
 
   def up
-    return if table_exists?(:login)
+    return if table_exists?(:logins)
 
     create_table :logins, primary_key_options(:id) do |t|
       t.string :identification,  null: false
